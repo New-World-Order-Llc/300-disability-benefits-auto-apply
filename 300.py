@@ -151,11 +151,21 @@ class DisabilityBenefitsAutomation:
         timestamp = self.clock()
         if timestamp.tzinfo is None:
             raise ValueError("audit clock must return a timezone-aware datetime")
+        snapshot = {
+            "action": action,
+            "profile": profile.as_dict(),
+            "details": _json_value(details),
+        }
         event = AuditEvent(
             timestamp=timestamp.astimezone(timezone.utc).isoformat(),
             action=action,
             member_id=profile.member_id,
-            details=dict(details),
+            details={
+                **details,
+                "state_sha256": hashlib.sha256(
+                    _canonical_json(snapshot).encode("utf-8")
+                ).hexdigest(),
+            },
         )
         self.audit_sink.write(event)
 
@@ -167,7 +177,6 @@ class DisabilityBenefitsAutomation:
         self._audit("compliance_check", profile, {
             "passed": not missing,
             "missing_flags": list(missing),
-            "profile_sha256": hashlib.sha256(_canonical_json(profile.as_dict()).encode()).hexdigest(),
         })
         return not missing, missing
 

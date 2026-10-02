@@ -51,6 +51,7 @@ class AutomationTests(unittest.TestCase):
         self.assertEqual(result.status_code, 201)
         self.assertEqual(result.submission_id, first["submission_id"])
         self.assertEqual(self.audit.events[-1].action, "submission_completed")
+        self.assertEqual(len(self.audit.events[-1].details["state_sha256"]), 64)
 
     def test_compliance_failure_prevents_eligibility_and_submission(self):
         profile = module.MemberProfile(
