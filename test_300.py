@@ -1,4 +1,5 @@
 import importlib.util
+import sys
 import unittest
 from datetime import datetime, timezone
 from decimal import Decimal
@@ -8,6 +9,7 @@ from pathlib import Path
 MODULE_PATH = Path(__file__).with_name("300.py")
 SPEC = importlib.util.spec_from_file_location("disability_benefits_300", MODULE_PATH)
 module = importlib.util.module_from_spec(SPEC)
+sys.modules[SPEC.name] = module
 SPEC.loader.exec_module(module)
 
 
